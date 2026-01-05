@@ -1,24 +1,26 @@
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
+from django.contrib.auth.models import AbstractUser, BaseUserManager
 from django.db import models
 from django.utils import timezone
 import uuid
 
 
 class UserManager(BaseUserManager):
-    """Custom user manager for email-based authentication"""
+    """Custom user manager"""
     
-    def create_user(self, email, password=None, **extra_fields):
+    def create_user(self, username, email, password=None, **extra_fields):
         """Create and return a regular user"""
         if not email:
             raise ValueError('Users must have an email address')
+        if not username:
+            raise ValueError('Users must have a username')
         
         email = self.normalize_email(email)
-        user = self.model(email=email, **extra_fields)
-        user.set_password(password)  # Hashes the password
+        user = self.model(username=username, email=email, **extra_fields)
+        user.set_password(password)
         user.save(using=self._db)
         return user
     
-    def create_superuser(self, email, password=None, **extra_fields):
+    def create_superuser(self, username, email, password=None, **extra_fields):
         """Create and return a superuser"""
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
@@ -29,61 +31,44 @@ class UserManager(BaseUserManager):
         if extra_fields.get('is_superuser') is not True:
             raise ValueError('Superuser must have is_superuser=True')
         
-        return self.create_user(email, password, **extra_fields)
+        return self.create_user(username, email, password, **extra_fields)
 
 
-class User(AbstractBaseUser, PermissionsMixin):
-    """Custom User model with email as username"""
+class User(AbstractUser):
+    """Custom User model with both username and email"""
     
     ROLE_CHOICES = [
         ('admin', 'Admin'),
         ('customer', 'Customer'),
     ]
     
-    # Primary Key
+    # Change primary key to UUID
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     
-    # Authentication fields
-    email = models.EmailField(max_length=255, unique=True, db_index=True)
-    password_hash = None  # We use 'password' from AbstractBaseUser
-    
-    # Personal Information
-    first_name = models.CharField(max_length=150, blank=True)
-    last_name = models.CharField(max_length=150, blank=True)
-    
-    # Role and permissions
+    # Role field
     role = models.CharField(max_length=20, choices=ROLE_CHOICES, default='customer')
     
-    # Django admin permissions
-    is_active = models.BooleanField(default=True)
-    is_staff = models.BooleanField(default=False)
+    # Make email required and unique
+    email = models.EmailField(unique=True, db_index=True)
     
-    # Timestamps
+    # Email verification
+    email_verified = models.BooleanField(default=False)
+    
+    # Security fields
+    failed_login_attempts = models.IntegerField(default=0)
+    account_locked_until = models.DateTimeField(null=True, blank=True)
+    last_password_change = models.DateTimeField(auto_now_add=True)
+    
+    # Timestamp fields
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
-    
-    # Fix for groups and permissions clash
-    groups = models.ManyToManyField(
-        'auth.Group',
-        verbose_name='groups',
-        blank=True,
-        related_name='custom_user_set',
-        related_query_name='custom_user',
-    )
-    user_permissions = models.ManyToManyField(
-        'auth.Permission',
-        verbose_name='user permissions',
-        blank=True,
-        related_name='custom_user_set',
-        related_query_name='custom_user',
-    )
     
     # Custom manager
     objects = UserManager()
     
-    # Use email as the username field
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['first_name', 'last_name']
+    # Use username as the login field
+    USERNAME_FIELD = 'username'
+    REQUIRED_FIELDS = ['email']
     
     class Meta:
         db_table = 'users'
@@ -92,15 +77,7 @@ class User(AbstractBaseUser, PermissionsMixin):
         ordering = ['-created_at']
     
     def __str__(self):
-        return self.email
-    
-    def get_full_name(self):
-        """Return the first_name plus the last_name, with a space in between"""
-        return f'{self.first_name} {self.last_name}'.strip()
-    
-    def get_short_name(self):
-        """Return the short name for the user"""
-        return self.first_name
+        return self.username
     
     @property
     def is_admin(self):
@@ -111,3 +88,14 @@ class User(AbstractBaseUser, PermissionsMixin):
     def is_customer(self):
         """Check if user is a customer"""
         return self.role == 'customer'
+    
+    def is_account_locked(self):
+        """Check if account is currently locked"""
+        if self.account_locked_until:
+            if timezone.now() < self.account_locked_until:
+                return True
+            # Unlock if time has passed
+            self.account_locked_until = None
+            self.failed_login_attempts = 0
+            self.save()
+        return False

@@ -21,9 +21,21 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'email', 'password', 'password_confirm', 
+        fields = ['id', 'username', 'email', 'password', 'password_confirm', 
                   'first_name', 'last_name', 'role']
         read_only_fields = ['id']
+    
+    def validate_username(self, value):
+        """Ensure username is unique"""
+        if User.objects.filter(username=value).exists():
+            raise serializers.ValidationError("This username is already taken.")
+        return value
+    
+    def validate_email(self, value):
+        """Ensure email is unique"""
+        if User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email is already in use.")
+        return value
     
     def validate(self, attrs):
         """Validate that passwords match"""
@@ -37,6 +49,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         """Create user with hashed password"""
         validated_data.pop('password_confirm')
         user = User.objects.create_user(
+            username=validated_data['username'],  # ADD USERNAME HERE
             email=validated_data['email'],
             password=validated_data['password'],
             first_name=validated_data.get('first_name', ''),
@@ -47,9 +60,10 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.Serializer):
-    """Serializer for user login"""
+    """Serializer for user login - supports both username and email"""
     
-    email = serializers.EmailField(required=True)
+    username = serializers.CharField(required=False)
+    email = serializers.EmailField(required=False)
     password = serializers.CharField(
         required=True,
         write_only=True,
@@ -57,31 +71,47 @@ class UserLoginSerializer(serializers.Serializer):
     )
     
     def validate(self, attrs):
-        """Validate credentials"""
+        """Validate credentials - accept either username or email"""
+        username = attrs.get('username')
         email = attrs.get('email')
         password = attrs.get('password')
         
-        if email and password:
+        # Must provide either username or email
+        if not username and not email:
+            raise serializers.ValidationError(
+                'Must include either "username" or "email".',
+                code='authorization'
+            )
+        
+        # Try to find user by username or email
+        user = None
+        if username:
             user = authenticate(
                 request=self.context.get('request'),
-                username=email,
+                username=username,
                 password=password
             )
-            
-            if not user:
-                raise serializers.ValidationError(
-                    'Unable to log in with provided credentials.',
-                    code='authorization'
+        elif email:
+            # Find user by email first, then authenticate with username
+            try:
+                user_obj = User.objects.get(email=email)
+                user = authenticate(
+                    request=self.context.get('request'),
+                    username=user_obj.username,
+                    password=password
                 )
-            
-            if not user.is_active:
-                raise serializers.ValidationError(
-                    'User account is disabled.',
-                    code='authorization'
-                )
-        else:
+            except User.DoesNotExist:
+                pass
+        
+        if not user:
             raise serializers.ValidationError(
-                'Must include "email" and "password".',
+                'Unable to log in with provided credentials.',
+                code='authorization'
+            )
+        
+        if not user.is_active:
+            raise serializers.ValidationError(
+                'User account is disabled.',
                 code='authorization'
             )
         
@@ -96,7 +126,7 @@ class UserSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['id', 'email', 'first_name', 'last_name', 'full_name',
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'full_name',
                   'role', 'is_active', 'created_at', 'updated_at']
         read_only_fields = ['id', 'created_at', 'updated_at']
 
@@ -106,7 +136,14 @@ class UserUpdateSerializer(serializers.ModelSerializer):
     
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email']
+        fields = ['username', 'first_name', 'last_name', 'email']
+    
+    def validate_username(self, value):
+        """Ensure username is unique"""
+        user = self.context['request'].user
+        if User.objects.exclude(pk=user.pk).filter(username=value).exists():
+            raise serializers.ValidationError("This username is already taken.")
+        return value
     
     def validate_email(self, value):
         """Ensure email is unique"""
