@@ -40,7 +40,7 @@ export default function Navbar() {
               {/* Sign In / Register */}
               <div className="flex items-center gap-2">
                 <User className="w-4 h-4" />
-                <a href="#" className="font-medium hover:text-white/80 transition">Sign In</a>
+                <a href="/login" className="font-medium hover:text-white/80 transition">Sign In</a>
                 <span className="text-white/60">/</span>
                 <a href="#" className="font-medium hover:text-white/80 transition">Register</a>
               </div>
