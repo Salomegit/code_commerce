@@ -2,11 +2,17 @@
 import React, { useState } from 'react';
 import { User, Lock, Mail, Eye, EyeOff, ShoppingCart } from 'lucide-react';
 import { useForm } from 'react-hook-form';
+import { useRouter } from 'next/navigation'; // Add this import
 import Navbar from '@/components/layout/navbar';
 import { login } from '@/endpoints/auth/auth';
+
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Add loading state
+  const [errorMessage, setErrorMessage] = useState(''); // Add error state
+  
+  const router = useRouter(); // Initialize router
   
   const { register, handleSubmit, formState: { errors }, watch, reset } = useForm({
     defaultValues: {
@@ -20,7 +26,7 @@ export default function LoginPage() {
 
   const password = watch('password');
 
-  const onSubmit = (data:{
+  const onSubmit = async (data: {
     name?: string;
     username: string;
     email?: string;
@@ -28,6 +34,8 @@ export default function LoginPage() {
     confirmPassword?: string;
   }) => {
     console.log('Form submitted:', isLogin ? 'Login' : 'Register');
+    setErrorMessage(''); // Clear previous errors
+    setIsLoading(true); // Start loading
     
     if (isLogin) {
       const loginData = {
@@ -35,13 +43,37 @@ export default function LoginPage() {
         password: data.password
       };
       console.log('Login data:', loginData);
-       const handleLogin = () =>
-       {
-login(loginData);
-}
-       
+      
+      try {
+        const res = await login(loginData);
+        console.log("LOGIN RESPONSE:", res);
+        
+        // Store token if your API returns one
+        if (res.token) {
+          localStorage.setItem('authToken', res.token);
+        }
+        
+        // Show success message (optional - you can skip this and go straight to navigation)
+        // You could use a toast library here instead
+        alert('Login successful! Redirecting to homepage...');
+        
+        // Navigate to homepage
+        router.push('/'); // or '/home' or whatever your homepage route is
+        
+      } catch (error: any) {
+        console.error("LOGIN ERROR:", error);
+        
+        // Set error message to display to user
+        const message = error.response?.data?.message || 
+                       error.response?.data?.error ||
+                       'Login failed. Please check your credentials.';
+        setErrorMessage(message);
+      } finally {
+        setIsLoading(false); // Stop loading
+      }
+         
     } else {
-      // Registration with all fields
+      // Registration logic
       const registerData = {
         name: data.name,
         username: data.username,
@@ -50,14 +82,13 @@ login(loginData);
       };
       console.log('Register data:', registerData);
       // Call your registration endpoint here
-      // register(registerData);
+      setIsLoading(false);
     }
-    
-    alert(isLogin ? 'Signing in...' : 'Creating account...');
   };
 
   const handleModeSwitch = () => {
     setIsLogin(!isLogin);
+    setErrorMessage(''); // Clear error when switching modes
     reset();
   };
 
@@ -105,6 +136,13 @@ login(loginData);
 
           {/* Form */}
           <div className="p-8">
+            {/* Error Message */}
+            {errorMessage && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
+                <p className="text-red-600 text-sm font-medium">{errorMessage}</p>
+              </div>
+            )}
+
             <div className="space-y-5">
               {!isLogin && (
                 <div>
@@ -149,6 +187,7 @@ login(loginData);
                     })}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
                     placeholder="johndoe"
+                    disabled={isLoading}
                   />
                 </div>
                 {errors.username && (
@@ -199,6 +238,7 @@ login(loginData);
                     })}
                     className="w-full pl-11 pr-11 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
                     placeholder="••••••••"
+                    disabled={isLoading}
                   />
                   <button
                     type="button"
@@ -256,9 +296,20 @@ login(loginData);
 
               <button
                 onClick={handleSubmit(onSubmit)}
-                className="w-full bg-gradient-to-r from-yellow-500 to-rose-900 hover:from-yellow-600 hover:to-rose-950 text-white font-semibold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl"
+                disabled={isLoading}
+                className="w-full bg-gradient-to-r from-yellow-500 to-rose-900 hover:from-yellow-600 hover:to-rose-950 text-white font-semibold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {isLogin ? 'Sign In' : 'Create Account'}
+                {isLoading ? (
+                  <span className="flex items-center justify-center">
+                    <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    {isLogin ? 'Signing In...' : 'Creating Account...'}
+                  </span>
+                ) : (
+                  isLogin ? 'Sign In' : 'Create Account'
+                )}
               </button>
             </div>
 

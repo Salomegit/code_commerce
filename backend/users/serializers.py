@@ -62,7 +62,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     """Serializer for user login - supports both username and email"""
     
-    username = serializers.CharField(required=False)
+    username = serializers.CharField(required=True)
     email = serializers.EmailField(required=False)
     password = serializers.CharField(
         required=True,

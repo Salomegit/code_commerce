@@ -13,13 +13,48 @@ const AUTH_URLS = {
 
 };
 
-export const login = async (credentials:{username: string, password: string}) =>{
-  const response = await axios.post(AUTH_URLS.LOGIN, credentials,{  withCredentials: true });
-    return response.data.message;
+export const login = async (credentials: {username: string, password: string}) => {
+  try {
+    const response = await axios.post(AUTH_URLS.LOGIN, credentials, { 
+      withCredentials: true 
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Login error:", error);
+    throw error; // Re-throw so the caller can handle it
+  }
 }
-
-
 export const refreshToken = async () => {
-  const response = await axios.post(AUTH_URLS.REFRESH_TOKEN_URL, {}, { withCredentials: true });
-  return response.data;
+  try {
+    const response = await axios.post(AUTH_URLS.REFRESH_TOKEN_URL, {}, { withCredentials: true });
+    return response.data;
+  } catch (error) {
+    console.error('Error refreshing token:', error);
+    return null;
+  }
 }
+
+export const  callRefreshToken = async  (error:any, func:any) => {
+  if (error.response.status === 401 && error.response) {
+    const tokenRefreshed = await refreshToken();
+
+    if (tokenRefreshed) {
+      const retryResponse = await func();
+      return retryResponse.data;
+    }
+    }
+
+    return false
+}
+
+export const logout = async () => {
+
+  try {
+    const response = await axios.post(AUTH_URLS.LOGOUT, {}, { withCredentials: true });
+    return response.data.message;
+  } catch (error) {
+    console.error('Error during logout:', error);
+    throw error;
+  }
+}
+   
