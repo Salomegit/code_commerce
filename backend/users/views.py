@@ -61,7 +61,7 @@ class UserLoginView(APIView):
             return Response({
                 'message': 'Login successful',
                 # 'user': UserSerializer(user).data,
-                'tokens': tokens
+                # 'tokens': tokens
             }, status=status.HTTP_200_OK)
         
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)

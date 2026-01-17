@@ -5,6 +5,8 @@ import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation'; // Add this import
 import Navbar from '@/components/layout/navbar';
 import { login } from '@/endpoints/auth/auth';
+import toast, { Toaster } from 'react-hot-toast';
+
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -53,12 +55,8 @@ export default function LoginPage() {
           localStorage.setItem('authToken', res.token);
         }
         
-        // Show success message (optional - you can skip this and go straight to navigation)
-        // You could use a toast library here instead
-        alert('Login successful! Redirecting to homepage...');
-        
-        // Navigate to homepage
-        router.push('/'); // or '/home' or whatever your homepage route is
+       toast.success('Login successful!');
+router.push('/');
         
       } catch (error: any) {
         console.error("LOGIN ERROR:", error);
