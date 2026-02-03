@@ -18,7 +18,11 @@ from django.contrib import admin
 from django.urls import path
 from django.urls import include
 
+from .view import ProtectedHealthCheckView
+
 urlpatterns = [
+
+    path('health/', ProtectedHealthCheckView.as_view(), name='health_check'),
     path('admin/', admin.site.urls),
     path('api/v1/', include('products.urls')),
     path('api/v1/users/', include('users.urls')),

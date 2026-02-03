@@ -16,7 +16,8 @@ import os
 
 # Load environment variables from .env file
 load_dotenv()
-
+HEALTH_CHECK_TOKEN = os.environ.get('HEALTH_CHECK_TOKEN', 'default-dev-token')
+HEALTH_CHECK_ALLOWED_IPS = os.environ.get('HEALTH_CHECK_IPS', '127.0.0.1').split(',')
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -32,10 +33,13 @@ SECRET_KEY = 'django-insecure-wr=4t2a4#j@y0n03#5-xk9dnm6=m$hs5ucr=@_dxwr3b!!10da
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1']
+
 
 AUTH_USER_MODEL = 'users.User'
 # Application definition
+
+HEALTH_CHECK_ALLOWED_IPS=['127.0.0.1']
 
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -47,6 +51,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'users',
+    'health_check', 
+    'health_check.db',
     'rest_framework_simplejwt.token_blacklist',
 ]
 
