@@ -13,9 +13,9 @@ export default function LoginPage() {
   const [isLogin, setIsLogin] = useState(true);
   const [isLoading, setIsLoading] = useState(false); // Add loading state
   const [errorMessage, setErrorMessage] = useState(''); // Add error state
-  
+
   const router = useRouter(); // Initialize router
-  
+
   const { register, handleSubmit, formState: { errors }, watch, reset } = useForm({
     defaultValues: {
       name: '',
@@ -38,38 +38,38 @@ export default function LoginPage() {
     console.log('Form submitted:', isLogin ? 'Login' : 'Register');
     setErrorMessage(''); // Clear previous errors
     setIsLoading(true); // Start loading
-    
+
     if (isLogin) {
       const loginData = {
         username: data.username,
         password: data.password
       };
       console.log('Login data:', loginData);
-      
+
       try {
         const res = await login(loginData);
         console.log("LOGIN RESPONSE:", res);
-        
+
         // Store token if your API returns one
         if (res.token) {
           localStorage.setItem('authToken', res.token);
         }
-        
-       toast.success('Login successful!');
-router.push('/');
-        
+
+        toast.success('Login successful!');
+        router.push('/');
+
       } catch (error: any) {
         console.error("LOGIN ERROR:", error);
-        
+
         // Set error message to display to user
-        const message = error.response?.data?.message || 
-                       error.response?.data?.error ||
-                       'Login failed. Please check your credentials.';
+        const message = error.response?.data?.message ||
+          error.response?.data?.error ||
+          'Login failed. Please check your credentials.';
         setErrorMessage(message);
       } finally {
         setIsLoading(false); // Stop loading
       }
-         
+
     } else {
       // Registration logic
       const registerData = {
@@ -111,22 +111,20 @@ router.push('/');
             <button
               onClick={handleModeSwitch}
               type="button"
-              className={`flex-1 py-4 text-center font-semibold transition-all duration-300 ${
-                isLogin
+              className={`flex-1 py-4 text-center font-semibold transition-all duration-300 ${isLogin
                   ? 'text-white bg-gradient-to-r from-yellow-500 to-rose-900'
                   : 'text-gray-500 hover:bg-orange-50'
-              }`}
+                }`}
             >
               Sign In
             </button>
             <button
               onClick={handleModeSwitch}
               type="button"
-              className={`flex-1 py-4 text-center font-semibold transition-all duration-300 ${
-                !isLogin
+              className={`flex-1 py-4 text-center font-semibold transition-all duration-300 ${!isLogin
                   ? 'text-white bg-gradient-to-r from-yellow-500 to-rose-900'
                   : 'text-gray-500 hover:bg-orange-50'
-              }`}
+                }`}
             >
               Register
             </button>
@@ -283,7 +281,7 @@ router.push('/');
                     />
                     <span className="ml-2 text-sm text-gray-600">Remember me</span>
                   </label>
-                  <button 
+                  <button
                     type="button"
                     className="text-sm bg-gradient-to-r from-yellow-500 to-rose-900 bg-clip-text text-transparent hover:from-yellow-600 hover:to-rose-950 font-semibold"
                   >
@@ -323,7 +321,7 @@ router.push('/');
 
             {/* Social Login */}
             <div className="grid grid-cols-2 gap-4">
-              <button 
+              <button
                 type="button"
                 className="flex items-center justify-center px-4 py-3 border-2 border-gray-200 rounded-xl hover:bg-orange-50 hover:border-orange-300 transition-all"
               >
@@ -347,7 +345,7 @@ router.push('/');
                 </svg>
                 <span className="ml-2 text-sm font-semibold text-gray-700">Google</span>
               </button>
-              <button 
+              <button
                 type="button"
                 className="flex items-center justify-center px-4 py-3 border-2 border-gray-200 rounded-xl hover:bg-orange-50 hover:border-orange-300 transition-all"
               >
