@@ -1,7 +1,11 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { login,logout } from '../../endpoints/auth/auth';
 
-export const loginUser = createAsyncThunk(
+export const loginUser = createAsyncThunk<
+  { user: any; token: string },
+  { username: string; password: string },
+  { rejectValue: string }
+>(
   'auth/login',
   async (credentials: { username: string; password: string }, { rejectWithValue }) => {
     try {
@@ -19,19 +23,19 @@ const authSlice = createSlice({
   name: 'auth',
   initialState: {
     user: null,
-    token: localStorage.getItem('token') || null,
+    // token: localStorage.getItem('token') || null,
     isLoading: false,
     isAuthenticated: false,
     error: null,
   },
   reducers: {
     // Regular synchronous actions
-    logout: (state) => {
-      state.user = null;
-      state.token = null;
-      state.isAuthenticated = false;
-      localStorage.removeItem('token');
-    },
+    // logout: (state) => {
+    //   state.user = null;
+    //   state.token = null;
+    //   state.isAuthenticated = false;
+    //   localStorage.removeItem('token');
+    // },
     clearError: (state) => {
       state.error = null;
     },
@@ -56,19 +60,19 @@ const authSlice = createSlice({
   },
 });
 
-export const { logout, clearError } = authSlice.actions;
+export const {  clearError } = authSlice.actions;
 export default authSlice.reducer;
 
-export const logoutUser = createAsyncThunk(
-  'auth/logout',
-  async (_, { rejectWithValue }) => {
-    try {
-      const response = await axios.post(AUTH_URLS.LOGOUT, {}, { 
-        withCredentials: true 
-      });
-      return response.data;
-    } catch (error: any) {
-      return rejectWithValue(error.response?.data?.message || 'Logout failed');
-    }
-  }
-);
+// export const logoutUser = createAsyncThunk(
+//   'auth/logout',
+//   async (_, { rejectWithValue }) => {
+//     try {
+//       const response = await axios.post(AUTH_URLS.LOGOUT, {}, { 
+//         withCredentials: true 
+//       });
+//       return response.data;
+//     } catch (error: any) {
+//       return rejectWithValue(error.response?.data?.message || 'Logout failed');
+//     }
+//   }
+// );

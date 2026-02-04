@@ -1,20 +1,22 @@
 'use client';
-import React, { useState } from 'react';
-import { User, Lock, Mail, Eye, EyeOff, ShoppingCart } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { User, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
-import { useRouter } from 'next/navigation'; // Add this import
-import Navbar from '@/components/layout/navbar';
-import { login } from '@/endpoints/auth/auth';
+import { useRouter } from 'next/navigation';
+import { useDispatch, useSelector } from 'react-redux';
+import { loginUser, clearError } from '@/features/auth/authSlice';
 import toast, { Toaster } from 'react-hot-toast';
-
+import type { AppDispatch, RootState } from '@/store/store';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
-  const [isLoading, setIsLoading] = useState(false); // Add loading state
-  const [errorMessage, setErrorMessage] = useState(''); // Add error state
 
-  const router = useRouter(); // Initialize router
+  const router = useRouter();
+  const dispatch = useDispatch<AppDispatch>();
+  
+  // Get state from Redux instead of local state
+  const { isLoading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const { register, handleSubmit, formState: { errors }, watch, reset } = useForm({
     defaultValues: {
@@ -28,6 +30,28 @@ export default function LoginPage() {
 
   const password = watch('password');
 
+  // Clear error when component unmounts or mode switches
+  useEffect(() => {
+    return () => {
+      dispatch(clearError());
+    };
+  }, [dispatch]);
+
+  // Redirect on successful login
+  useEffect(() => {
+    if (isAuthenticated) {
+      toast.success('Login successful!');
+      router.push('/');
+    }
+  }, [isAuthenticated, router]);
+
+  // Show error toast when error changes
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+    }
+  }, [error]);
+
   const onSubmit = async (data: {
     name?: string;
     username: string;
@@ -36,9 +60,7 @@ export default function LoginPage() {
     confirmPassword?: string;
   }) => {
     console.log('Form submitted:', isLogin ? 'Login' : 'Register');
-    setErrorMessage(''); // Clear previous errors
-    setIsLoading(true); // Start loading
-
+    
     if (isLogin) {
       const loginData = {
         username: data.username,
@@ -46,32 +68,18 @@ export default function LoginPage() {
       };
       console.log('Login data:', loginData);
 
-      try {
-        const res = await login(loginData);
-        console.log("LOGIN RESPONSE:", res);
-
-        // Store token if your API returns one
-        if (res.token) {
-          localStorage.setItem('authToken', res.token);
-        }
-
-        toast.success('Login successful!');
-        router.push('/');
-
-      } catch (error: any) {
-        console.error("LOGIN ERROR:", error);
-
-        // Set error message to display to user
-        const message = error.response?.data?.message ||
-          error.response?.data?.error ||
-          'Login failed. Please check your credentials.';
-        setErrorMessage(message);
-      } finally {
-        setIsLoading(false); // Stop loading
+      // Dispatch the Redux thunk - replaces entire try-catch!
+      const result = await dispatch(loginUser(loginData));
+      
+      // Optional: Handle based on result
+      if (loginUser.fulfilled.match(result)) {
+        console.log("LOGIN SUCCESS:", result.payload);
+        // Navigation handled by useEffect above
       }
+      // Error handling is automatic via Redux state
 
     } else {
-      // Registration logic
+      // Registration logic (keep as is for now)
       const registerData = {
         name: data.name,
         username: data.username,
@@ -80,18 +88,19 @@ export default function LoginPage() {
       };
       console.log('Register data:', registerData);
       // Call your registration endpoint here
-      setIsLoading(false);
     }
   };
 
   const handleModeSwitch = () => {
     setIsLogin(!isLogin);
-    setErrorMessage(''); // Clear error when switching modes
+    dispatch(clearError()); // Clear Redux error state
     reset();
   };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-100 via-amber-50 to-orange-200 flex items-center justify-center p-4">
+      <Toaster position="top-right" />
+      
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8">
@@ -109,22 +118,24 @@ export default function LoginPage() {
           {/* Tab Switcher */}
           <div className="flex border-b border-orange-100">
             <button
-              onClick={handleModeSwitch}
+              onClick={() => !isLogin && handleModeSwitch()}
               type="button"
-              className={`flex-1 py-4 text-center font-semibold transition-all duration-300 ${isLogin
+              className={`flex-1 py-4 text-center font-semibold transition-all duration-300 ${
+                isLogin
                   ? 'text-white bg-gradient-to-r from-yellow-500 to-rose-900'
                   : 'text-gray-500 hover:bg-orange-50'
-                }`}
+              }`}
             >
               Sign In
             </button>
             <button
-              onClick={handleModeSwitch}
+              onClick={() => isLogin && handleModeSwitch()}
               type="button"
-              className={`flex-1 py-4 text-center font-semibold transition-all duration-300 ${!isLogin
+              className={`flex-1 py-4 text-center font-semibold transition-all duration-300 ${
+                !isLogin
                   ? 'text-white bg-gradient-to-r from-yellow-500 to-rose-900'
                   : 'text-gray-500 hover:bg-orange-50'
-                }`}
+              }`}
             >
               Register
             </button>
@@ -132,14 +143,14 @@ export default function LoginPage() {
 
           {/* Form */}
           <div className="p-8">
-            {/* Error Message */}
-            {errorMessage && (
+            {/* Error Message - Now from Redux */}
+            {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
-                <p className="text-red-600 text-sm font-medium">{errorMessage}</p>
+                <p className="text-red-600 text-sm font-medium">{error}</p>
               </div>
             )}
 
-            <div className="space-y-5">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
               {!isLogin && (
                 <div>
                   <label className="block text-sm font-semibold text-gray-700 mb-2">
@@ -291,7 +302,7 @@ export default function LoginPage() {
               )}
 
               <button
-                onClick={handleSubmit(onSubmit)}
+                type="submit"
                 disabled={isLoading}
                 className="w-full bg-gradient-to-r from-yellow-500 to-rose-900 hover:from-yellow-600 hover:to-rose-950 text-white font-semibold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
@@ -307,7 +318,7 @@ export default function LoginPage() {
                   isLogin ? 'Sign In' : 'Create Account'
                 )}
               </button>
-            </div>
+            </form>
 
             {/* Divider */}
             <div className="relative my-6">

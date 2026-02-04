@@ -1,11 +1,13 @@
 import Image from "next/image";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
+import { Provider } from 'react-redux';
+import { store } from '../store/store';
 
 export default function Home() {
   return (
     
-    <div >
+    <div className="min-h-screen">
       <Navbar />
       <main className="min-h-screen bg-bgLight">
         {/* Hero Section */}
