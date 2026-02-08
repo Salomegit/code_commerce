@@ -3,6 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import get_user_model
+from rest_framework.decorators import api_view, permission_classes
+
 from .serializers import (
     UserRegistrationSerializer,
     UserLoginSerializer,
@@ -57,12 +59,35 @@ class UserLoginView(APIView):
         if serializer.is_valid():
             user = serializer.validated_data['user']
             tokens = get_tokens_for_user(user)
+            response = Response(
+                {
+                    'message': 'Login successful',
+                    # 'user': UserSerializer(user).data,
+                    'tokens': tokens
+                },
+                status=status.HTTP_200_OK
+            )
             
-            return Response({
-                'message': 'Login successful',
-                # 'user': UserSerializer(user).data,
-                # 'tokens': tokens
-            }, status=status.HTTP_200_OK)
+            response.set_cookie(
+                key='access_token',
+                value=tokens['access'],
+                httponly=False,
+                secure=False,
+                samesite='None',
+                max_age=15 * 60  # 15 minutes
+            )
+            response.set_cookie(
+                key='refresh_token',
+                value=tokens['refresh'],
+                httponly=False,
+                secure=False,
+                samesite='None',
+                max_age=7 * 24 * 60 * 60  # 7 days
+            )
+            
+            return response
+        
+        
         
         return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
 
@@ -127,11 +152,13 @@ class ChangePasswordView(APIView):
 class UserLogoutView(APIView):
     """Logout user by blacklisting refresh token"""
     
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [permissions.AllowAny]  # Change to AllowAny
     
     def post(self, request):
         try:
-            refresh_token = request.data.get('refresh_token')
+            # Get refresh token from cookie instead of body
+            refresh_token = request.COOKIES.get('refresh_token')
+            
             if not refresh_token:
                 return Response({
                     'error': 'Refresh token is required'
@@ -140,13 +167,33 @@ class UserLogoutView(APIView):
             token = RefreshToken(refresh_token)
             token.blacklist()
             
-            return Response({
+            # Clear cookies
+            response = Response({
                 'message': 'Logout successful'
             }, status=status.HTTP_200_OK)
+            response.delete_cookie('access_token')
+            response.delete_cookie('refresh_token')
+            
+            return response
         except Exception as e:
             return Response({
                 'error': 'Invalid token'
             }, status=status.HTTP_400_BAD_REQUEST)
+
+class IsAuthenticatedView(APIView):
+    """Check if user is authenticated"""
+    
+    permission_classes = [permissions.IsAuthenticated]
+    
+    def get(self, request):  # Use GET, not POST for checking status
+        return Response({
+            'is_authenticated': True,
+            'user': {
+                'id': request.user.id,
+                'username': request.user.username,
+                'email': request.user.email
+            }
+        }, status=status.HTTP_200_OK)
 
 
 class UserListView(generics.ListAPIView):
@@ -162,3 +209,43 @@ class UserListView(generics.ListAPIView):
             return User.objects.all()
         # Regular users can only see themselves
         return User.objects.filter(id=self.request.user.id)
+    
+
+
+# views.py
+class TokenRefreshView(APIView):
+    """Refresh access token using refresh token from cookie"""
+    
+    permission_classes = [permissions.AllowAny]
+    
+    def post(self, request):
+        refresh_token = request.COOKIES.get('refresh_token')
+        
+        if not refresh_token:
+            return Response({
+                'error': 'Refresh token not found'
+            }, status=status.HTTP_401_UNAUTHORIZED)
+        
+        try:
+            refresh = RefreshToken(refresh_token)
+            new_access_token = str(refresh.access_token)
+            
+            response = Response({
+                'message': 'Token refreshed successfully'
+            }, status=status.HTTP_200_OK)
+            
+            response.set_cookie(
+                key='access_token',
+                value=new_access_token,
+                httponly=False,
+                secure=False,
+                samesite='None',
+                max_age=15 * 60
+            )
+            
+            return response
+            
+        except Exception as e:
+            return Response({
+                'error': 'Invalid refresh token'
+            }, status=status.HTTP_401_UNAUTHORIZED)

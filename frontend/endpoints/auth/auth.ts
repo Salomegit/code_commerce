@@ -18,12 +18,26 @@ export const login = async (credentials: {username: string, password: string}) =
     const response = await axios.post(AUTH_URLS.LOGIN, credentials, { 
       withCredentials: true 
     });
-    return response.data;
+    return response.data; // Should contain user data and token
+
   } catch (error) {
     console.error("Login error:", error);
     throw error; // Re-throw so the caller can handle it
   }
 }
+
+export const register = async (userData: {username: string, first_name: string, last_name: string, email: string, password: string,password_confirm: string}) => {
+  try {
+    const response = await axios.post(AUTH_URLS.REGISTER, userData, { 
+      withCredentials: true 
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Registration error:", error);
+    throw error; // Re-throw so the caller can handle it
+  }
+}
+
 export const refreshToken = async () => {
   try {
     const response = await axios.post(AUTH_URLS.REFRESH_TOKEN_URL, {}, { withCredentials: true });

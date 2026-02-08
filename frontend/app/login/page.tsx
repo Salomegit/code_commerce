@@ -4,7 +4,7 @@ import { User, Lock, Mail, Eye, EyeOff } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { useRouter } from 'next/navigation';
 import { useDispatch, useSelector } from 'react-redux';
-import { loginUser, clearError } from '@/features/auth/authSlice';
+import { loginUser, registerUser, clearError } from '@/features/auth/authSlice';
 import toast, { Toaster } from 'react-hot-toast';
 import type { AppDispatch, RootState } from '@/store/store';
 
@@ -15,22 +15,23 @@ export default function LoginPage() {
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   
-  // Get state from Redux instead of local state
+  // Get state from Redux
   const { isLoading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
 
   const { register, handleSubmit, formState: { errors }, watch, reset } = useForm({
     defaultValues: {
-      name: '',
+      first_name: '',
+      last_name: '',
       username: '',
       email: '',
       password: '',
-      confirmPassword: ''
+      password_confirm: ''
     }
   });
 
   const password = watch('password');
 
-  // Clear error when component unmounts or mode switches
+  // Clear error when component unmounts
   useEffect(() => {
     return () => {
       dispatch(clearError());
@@ -53,47 +54,54 @@ export default function LoginPage() {
   }, [error]);
 
   const onSubmit = async (data: {
-    name?: string;
+    first_name?: string;
+    last_name?: string;
     username: string;
     email?: string;
     password: string;
-    confirmPassword?: string;
+    password_confirm?: string;
   }) => {
     console.log('Form submitted:', isLogin ? 'Login' : 'Register');
     
     if (isLogin) {
+      // LOGIN
       const loginData = {
         username: data.username,
         password: data.password
       };
-      console.log('Login data:', loginData);
-
-      // Dispatch the Redux thunk - replaces entire try-catch!
+      
       const result = await dispatch(loginUser(loginData));
       
-      // Optional: Handle based on result
       if (loginUser.fulfilled.match(result)) {
         console.log("LOGIN SUCCESS:", result.payload);
-        // Navigation handled by useEffect above
       }
-      // Error handling is automatic via Redux state
 
     } else {
-      // Registration logic (keep as is for now)
+      // REGISTRATION
       const registerData = {
-        name: data.name,
         username: data.username,
-        email: data.email,
-        password: data.password
+        email: data.email!,
+        password: data.password,
+        password_confirm: data.password_confirm!, // ✅ Add password_confirm
+        first_name: data.first_name!,
+        last_name: data.last_name!
+        // role is NOT included - backend sets it automatically to 'customer'
       };
-      console.log('Register data:', registerData);
-      // Call your registration endpoint here
+      
+      const result = await dispatch(registerUser(registerData));
+      
+      if (registerUser.fulfilled.match(result)) {
+        console.log("REGISTRATION SUCCESS:", result.payload);
+        toast.success('Registration successful! Please sign in.');
+        setIsLogin(true);
+        reset();
+      }
     }
   };
 
   const handleModeSwitch = () => {
     setIsLogin(!isLogin);
-    dispatch(clearError()); // Clear Redux error state
+    dispatch(clearError());
     reset();
   };
 
@@ -143,7 +151,7 @@ export default function LoginPage() {
 
           {/* Form */}
           <div className="p-8">
-            {/* Error Message - Now from Redux */}
+            {/* Error Message */}
             {error && (
               <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-xl">
                 <p className="text-red-600 text-sm font-medium">{error}</p>
@@ -151,30 +159,57 @@ export default function LoginPage() {
             )}
 
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              {/* First Name and Last Name - Only for Registration */}
               {!isLogin && (
-                <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-2">
-                    Full Name
-                  </label>
-                  <div className="relative">
-                    <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                    <input
-                      type="text"
-                      {...register('name', {
-                        required: !isLogin && 'Name is required',
-                        minLength: {
-                          value: 2,
-                          message: 'Name must be at least 2 characters'
-                        }
-                      })}
-                      className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
-                      placeholder="John Doe"
-                    />
+                <>
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      First Name
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        {...register('first_name', {
+                          required: !isLogin && 'First name is required',
+                          minLength: {
+                            value: 2,
+                            message: 'First name must be at least 2 characters'
+                          }
+                        })}
+                        className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
+                        placeholder="John"
+                      />
+                    </div>
+                    {errors.first_name && (
+                      <p className="text-red-500 text-xs mt-1">{errors.first_name.message}</p>
+                    )}
                   </div>
-                  {errors.name && (
-                    <p className="text-red-500 text-xs mt-1">{errors.name.message}</p>
-                  )}
-                </div>
+
+                  <div>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Last Name
+                    </label>
+                    <div className="relative">
+                      <User className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
+                      <input
+                        type="text"
+                        {...register('last_name', {
+                          required: !isLogin && 'Last name is required',
+                          minLength: {
+                            value: 2,
+                            message: 'Last name must be at least 2 characters'
+                          }
+                        })}
+                        className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
+                        placeholder="Doe"
+                      />
+                    </div>
+                    {errors.last_name && (
+                      <p className="text-red-500 text-xs mt-1">{errors.last_name.message}</p>
+                    )}
+                  </div>
+                </>
               )}
 
               <div>
@@ -269,7 +304,7 @@ export default function LoginPage() {
                     <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                     <input
                       type={showPassword ? 'text' : 'password'}
-                      {...register('confirmPassword', {
+                      {...register('password_confirm', {
                         required: !isLogin && 'Please confirm your password',
                         validate: value => value === password || 'Passwords do not match'
                       })}
@@ -277,8 +312,8 @@ export default function LoginPage() {
                       placeholder="••••••••"
                     />
                   </div>
-                  {errors.confirmPassword && (
-                    <p className="text-red-500 text-xs mt-1">{errors.confirmPassword.message}</p>
+                  {errors.password_confirm && (
+                    <p className="text-red-500 text-xs mt-1">{errors.password_confirm.message}</p>
                   )}
                 </div>
               )}

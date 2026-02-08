@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import { login,logout } from '../../endpoints/auth/auth';
+import { login,logout,register } from '../../endpoints/auth/auth';
 
 export const loginUser = createAsyncThunk<
   { user: any; token: string },
@@ -19,6 +19,42 @@ export const loginUser = createAsyncThunk<
   }
 );
 
+
+export const registerUser = createAsyncThunk(
+  'auth/register',
+  async (
+    userData: {
+      username: string;
+      email: string;
+      password: string;
+      password_confirm: string;
+      first_name: string;
+      last_name: string;
+    },
+    { rejectWithValue }
+  ) => {
+    try {
+      console.log('📤 Sending registration data:', userData);
+      const response = await register(userData);
+      console.log('✅ Registration response:', response);
+      return response;
+    } catch (error: any) {
+      console.error('❌ Registration error:', error);
+      console.error('❌ Error response:', error.response?.data);
+      console.error('❌ Error status:', error.response?.status);
+      
+      // Extract the actual error message from the backend
+      const errorMessage = error.response?.data?.message 
+        || error.response?.data?.error
+        || error.response?.data?.detail
+        || JSON.stringify(error.response?.data)
+        || 'Registration failed';
+      
+      return rejectWithValue(errorMessage);
+    }
+  }
+);
+
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
@@ -30,12 +66,12 @@ const authSlice = createSlice({
   },
   reducers: {
     // Regular synchronous actions
-    // logout: (state) => {
-    //   state.user = null;
-    //   state.token = null;
-    //   state.isAuthenticated = false;
-    //   localStorage.removeItem('token');
-    // },
+    logout: (state) => {
+      state.user = null;
+      state.c = null;
+      state.isAuthenticated = false;
+      localStorage.removeItem('token');
+    },
     clearError: (state) => {
       state.error = null;
     },
