@@ -11,12 +11,16 @@ import type { AppDispatch, RootState } from '@/store/store';
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
+  const [localLoading, setLocalLoading] = useState(false);
 
   const router = useRouter();
   const dispatch = useDispatch<AppDispatch>();
   
   // Get state from Redux
   const { isLoading, error, isAuthenticated } = useSelector((state: RootState) => state.auth);
+
+  // Combined loading state for better UX
+  const isSubmitting = localLoading || isLoading;
 
   const { register, handleSubmit, formState: { errors }, watch, reset } = useForm({
     defaultValues: {
@@ -53,6 +57,11 @@ export default function LoginPage() {
     }
   }, [error]);
 
+  // Monitor loading state for debugging
+  useEffect(() => {
+    console.log('🔄 Loading state changed:', isLoading);
+  }, [isLoading]);
+
   const onSubmit = async (data: {
     first_name?: string;
     last_name?: string;
@@ -62,40 +71,50 @@ export default function LoginPage() {
     password_confirm?: string;
   }) => {
     console.log('Form submitted:', isLogin ? 'Login' : 'Register');
+    console.log('Current loading state:', isLoading);
     
-    if (isLogin) {
-      // LOGIN
-      const loginData = {
-        username: data.username,
-        password: data.password
-      };
-      
-      const result = await dispatch(loginUser(loginData));
-      
-      if (loginUser.fulfilled.match(result)) {
-        console.log("LOGIN SUCCESS:", result.payload);
-      }
+    setLocalLoading(true); // Start loading immediately
+    
+    try {
+      if (isLogin) {
+        // LOGIN
+        const loginData = {
+          username: data.username,
+          password: data.password
+        };
+        
+        const result = await dispatch(loginUser(loginData));
+        
+        if (loginUser.fulfilled.match(result)) {
+          console.log("LOGIN SUCCESS:", result.payload);
+        }
 
-    } else {
-      // REGISTRATION
-      const registerData = {
-        username: data.username,
-        email: data.email!,
-        password: data.password,
-        password_confirm: data.password_confirm!, // ✅ Add password_confirm
-        first_name: data.first_name!,
-        last_name: data.last_name!
-        // role is NOT included - backend sets it automatically to 'customer'
-      };
-      
-      const result = await dispatch(registerUser(registerData));
-      
-      if (registerUser.fulfilled.match(result)) {
-        console.log("REGISTRATION SUCCESS:", result.payload);
-        toast.success('Registration successful! Please sign in.');
-        setIsLogin(true);
-        reset();
+      } else {
+        // REGISTRATION
+        console.log('🚀 Starting registration...');
+        const registerData = {
+          username: data.username,
+          email: data.email!,
+          password: data.password,
+          password_confirm: data.password_confirm!, // ✅ Add password_confirm
+          first_name: data.first_name!,
+          last_name: data.last_name!
+          // role is NOT included - backend sets it automatically to 'customer'
+        };
+        
+        console.log('📤 Dispatching registerUser...');
+        const result = await dispatch(registerUser(registerData));
+        console.log('✅ Registration dispatch complete');
+        
+        if (registerUser.fulfilled.match(result)) {
+          console.log("REGISTRATION SUCCESS:", result.payload);
+          toast.success('Registration successful! Please sign in.');
+          setIsLogin(true);
+          reset();
+        }
       }
+    } finally {
+      setLocalLoading(false); // Stop loading when complete
     }
   };
 
@@ -229,7 +248,7 @@ export default function LoginPage() {
                     })}
                     className="w-full pl-11 pr-4 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
                     placeholder="johndoe"
-                    disabled={isLoading}
+                    disabled={isSubmitting}
                   />
                 </div>
                 {errors.username && (
@@ -280,7 +299,7 @@ export default function LoginPage() {
                     })}
                     className="w-full pl-11 pr-11 py-3 border border-gray-300 rounded-xl focus:ring-2 focus:ring-yellow-500 focus:border-transparent outline-none transition"
                     placeholder="••••••••"
-                    disabled={isLoading}
+                    disabled={isSubmitting}
                   />
                   <button
                     type="button"
@@ -338,10 +357,10 @@ export default function LoginPage() {
 
               <button
                 type="submit"
-                disabled={isLoading}
+                disabled={isSubmitting}
                 className="w-full bg-gradient-to-r from-yellow-500 to-rose-900 hover:from-yellow-600 hover:to-rose-950 text-white font-semibold py-3.5 rounded-xl transition-all transform hover:scale-[1.02] active:scale-[0.98] shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
               >
-                {isLoading ? (
+                {isSubmitting ? (
                   <span className="flex items-center justify-center">
                     <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
