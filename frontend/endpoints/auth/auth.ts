@@ -10,6 +10,7 @@ const AUTH_URLS = {
   REFRESH_TOKEN_URL: `${BASE_URL}/token/refresh/`,
   PROFILE: `${BASE_URL}/profile/`,
   CHANGE_PASSWORD: `${BASE_URL}/change-password/`,
+  IS_AUTHENTICATED: `${BASE_URL}/is-authenticated/`,
 
 };
 
@@ -59,6 +60,16 @@ export const  callRefreshToken = async  (error:any, func:any) => {
     }
 
     return false
+}
+
+export const isAuthenticated = async () => {
+  try {
+    const response = await axios.get(AUTH_URLS.IS_AUTHENTICATED, { withCredentials: true });
+    return response.data.isAuthenticated;
+  } catch (error) {
+    console.error('Error checking authentication:', error);
+    return false;
+  }
 }
 
 export const logout = async () => {

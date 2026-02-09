@@ -58,8 +58,8 @@ export const registerUser = createAsyncThunk(
 const authSlice = createSlice({
   name: 'auth',
   initialState: {
-    user: null,
-    // token: localStorage.getItem('token') || null,
+  user: null,
+  isInitialized: false,
     isLoading: false,
     isAuthenticated: false,
     error: null,
@@ -87,12 +87,14 @@ const authSlice = createSlice({
         state.isLoading = false;
         state.isAuthenticated = true;
         state.user = action.payload.user;
-        state.token = action.payload.token;
+        state.isInitialized = true;
       })
-      .addCase(loginUser.rejected, (state, action) => {
+        .addCase(loginUser.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = action.payload || 'Login failed';
-      });
+        state.error = action.payload as string;
+        state.isAuthenticated = false;
+        state.isInitialized = true;
+      })
   },
 });
 

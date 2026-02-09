@@ -71,7 +71,7 @@ class UserLoginView(APIView):
             response.set_cookie(
                 key='access_token',
                 value=tokens['access'],
-                httponly=False,
+                httponly=True,
                 secure=False,
                 samesite='None',
                 max_age=15 * 60  # 15 minutes
@@ -79,7 +79,7 @@ class UserLoginView(APIView):
             response.set_cookie(
                 key='refresh_token',
                 value=tokens['refresh'],
-                httponly=False,
+                httponly=True,
                 secure=False,
                 samesite='None',
                 max_age=7 * 24 * 60 * 60  # 7 days
