@@ -34,9 +34,7 @@ export const registerUser = createAsyncThunk(
     { rejectWithValue }
   ) => {
     try {
-      console.log('📤 Sending registration data:', userData);
       const response = await register(userData);
-      console.log('✅ Registration response:', response);
       return response;
     } catch (error: any) {
       console.error('❌ Registration error:', error);

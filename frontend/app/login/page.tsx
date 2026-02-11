@@ -58,9 +58,9 @@ export default function LoginPage() {
   }, [error]);
 
   // Monitor loading state for debugging
-  useEffect(() => {
-    console.log('🔄 Loading state changed:', isLoading);
-  }, [isLoading]);
+  // useEffect(() => {
+  //   console.log('🔄 Loading state changed:', isLoading);
+  // }, [isLoading]);
 
   const onSubmit = async (data: {
     first_name?: string;
@@ -70,10 +70,10 @@ export default function LoginPage() {
     password: string;
     password_confirm?: string;
   }) => {
-    console.log('Form submitted:', isLogin ? 'Login' : 'Register');
-    console.log('Current loading state:', isLoading);
+    // console.log('Form submitted:', isLogin ? 'Login' : 'Register');
+    // console.log('Current loading state:', isLoading);
     
-    setLocalLoading(true); // Start loading immediately
+    setLocalLoading(true); 
     
     try {
       if (isLogin) {
@@ -96,7 +96,7 @@ export default function LoginPage() {
           username: data.username,
           email: data.email!,
           password: data.password,
-          password_confirm: data.password_confirm!, // ✅ Add password_confirm
+          password_confirm: data.password_confirm!, 
           first_name: data.first_name!,
           last_name: data.last_name!
           // role is NOT included - backend sets it automatically to 'customer'

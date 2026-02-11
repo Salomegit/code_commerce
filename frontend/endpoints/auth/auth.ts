@@ -65,7 +65,7 @@ export const  callRefreshToken = async  (error:any, func:any) => {
 export const isAuthenticated = async () => {
   try {
     const response = await axios.get(AUTH_URLS.IS_AUTHENTICATED, { withCredentials: true });
-    return response.data.isAuthenticated;
+    return response.data.is_authenticated;
   } catch (error) {
     console.error('Error checking authentication:', error);
     return false;
