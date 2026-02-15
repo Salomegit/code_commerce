@@ -24,6 +24,6 @@ urlpatterns = [
 
     path('health/', ProtectedHealthCheckView.as_view(), name='health_check'),
     path('admin/', admin.site.urls),
-    path('api/v1/', include('products.urls')),
+    path('api/v1/products/', include('products.urls')),
     path('api/v1/users/', include('users.urls')),
 ]

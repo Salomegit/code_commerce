@@ -1,6 +1,13 @@
-from django.urls import path
-from .views import get_products
+from django.urls import path, include
+from rest_framework.routers import DefaultRouter
+from .views import ProductViewSet, CategoryViewSet
+
+router = DefaultRouter()
+router.register(r'products', ProductViewSet, basename='product')
+router.register(r'categories', CategoryViewSet, basename='category')
+
+app_name = 'products'
 
 urlpatterns = [
-    path('products/', get_products, name='get_products'   ),
+    path('', include(router.urls)),
 ]

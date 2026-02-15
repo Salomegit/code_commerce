@@ -54,6 +54,8 @@ INSTALLED_APPS = [
     'health_check', 
     'health_check.db',
     'rest_framework_simplejwt.token_blacklist',
+    'products',
+    'django_filters'
 ]
 
 AUTH_PASSWORD_VALIDATORS = [
