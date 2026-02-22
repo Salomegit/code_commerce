@@ -1,15 +1,16 @@
 import Image from "next/image";
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-import { Provider } from 'react-redux';
-import { store } from '../store/store';
+
 
 export default function Home() {
   return (
+    <>
     
-    <div className="min-h-screen">
+    
       <Navbar />
-      <main className="min-h-screen bg-bgLight">
+    <div className="">
+      <main className=" bg-bgLight">
         {/* Hero Section */}
         <section className="bg-gradient-to-r from-yellow-500 to-rose-900 text-white">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 flex flex-col md:flex-row items-center gap-10">
@@ -36,7 +37,8 @@ export default function Home() {
           </div>
         </section>
         </main>
-     <Footer />
     </div>
+     <Footer />
+                </>
   );
 }

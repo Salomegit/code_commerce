@@ -1,188 +1,345 @@
 'use client';
 
-import React, { useState } from 'react';
-import { ShoppingCart, Search, Menu, X, User, Globe, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { ShoppingCart, Search, Menu, X, User, Globe, ChevronDown, Zap } from 'lucide-react';
 
 export default function Navbar() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
+  const [searchFocused, setSearchFocused] = useState(false);
+  const [cartPulse, setCartPulse] = useState(false);
+
+  useEffect(() => {
+    const handler = () => setScrolled(window.scrollY > 10);
+    window.addEventListener('scroll', handler);
+    return () => window.removeEventListener('scroll', handler);
+  }, []);
+
+  // Pulse cart on mount for attention
+  useEffect(() => {
+    const t = setTimeout(() => setCartPulse(true), 1200);
+    const t2 = setTimeout(() => setCartPulse(false), 2200);
+    return () => { clearTimeout(t); clearTimeout(t2); };
+  }, []);
+
+  const categories = ['Electronics', 'Monitors', 'Components', 'Peripherals', 'Audio', 'Accessories', 'Build PC'];
 
   return (
-    <div className="bg-bgLight ">
-      {/* Top Bar */}
-      <div className="bg-gradient-to-r from-yellow-500 to-rose-900 text-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-10 text-sm">
-            {/* Welcome Message */}
-            <div className="flex items-center gap-2">
-              <span className="font-medium">WELCOME TO CODECOMMERCE STORE</span>
+    <>
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+        .nav-link { transition: all 0.2s ease; }
+        .nav-link:hover { color: #f59e0b !important; }
+        .cat-link { transition: all 0.2s ease; position: relative; }
+        .cat-link::after { content: ''; position: absolute; bottom: -2px; left: 50%; right: 50%; height: 2px; background: linear-gradient(90deg,#f59e0b,#ea580c); border-radius: 2px; transition: all 0.25s ease; }
+        .cat-link:hover::after { left: 12px; right: 12px; }
+        .cat-link:hover { color: #f59e0b !important; background: rgba(245,158,11,0.08) !important; }
+        .search-input:focus { outline: none; }
+        .cart-btn:hover .cart-icon { transform: rotate(-12deg) scale(1.15); }
+        .cart-icon { transition: transform 0.25s ease; }
+        @keyframes ping { 0% { transform: scale(1); opacity: 1; } 100% { transform: scale(2); opacity: 0; } }
+        .cart-ping { animation: ping 0.8s ease-out; }
+        .ticker-wrap { overflow: hidden; }
+        @keyframes ticker { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+        .ticker-inner { display: flex; gap: 56px; white-space: nowrap; animation: ticker 26s linear infinite; }
+        .mob-link:hover { color: #f59e0b !important; background: rgba(245,158,11,0.06) !important; }
+        
+        /* Responsive styles */
+        @media (max-width: 1024px) {
+          .main-container { padding: 0 20px !important; }
+          .category-container { padding: 0 20px !important; }
+        }
+        
+        @media (max-width: 768px) {
+          .main-container { padding: 0 16px !important; }
+          .category-container { padding: 0 16px !important; }
+          .desktop-search { display: none !important; }
+          .desktop-account { display: none !important; }
+          .mob-hamburger { display: flex !important; }
+          .utility-bar { display: none !important; }
+          .ticker-item { font-size: 11px !important; }
+          .logo-text { font-size: 18px !important; }
+          .logo-subtext { display: none !important; }
+        }
+        
+        @media (min-width: 769px) {
+          .mobile-search { display: none !important; }
+          .mobile-account-cta { display: none !important; }
+        }
+      `}</style>
+
+      <div style={{ fontFamily: "'DM Sans', sans-serif" }}>
+
+        {/* ── Ticker Top Bar ─────────────────────────────────────── */}
+        <div style={{ background: 'linear-gradient(135deg, #f59e0b, #ea580c)', padding: '8px 0', overflow: 'hidden' }}>
+          <div className="ticker-wrap">
+            <div className="ticker-inner">
+              {[...Array(2)].flatMap(() => [
+                '🚀 Free Shipping on Orders KES 5,000+',
+                '⚡ Flash Sale: 30% Off Accessories Today',
+                '🛡️ 100% Secure Payments',
+                '🎧 24/7 Developer Support',
+                '↩️ 30-Day Easy Returns',
+                '🔥 New Arrivals — Shop Now',
+              ]).map((item, i) => (
+                <span key={i} className="ticker-item" style={{ color: 'white', fontWeight: 700, fontSize: 12, letterSpacing: '0.5px', flexShrink: 0 }}>
+                  {item}
+                </span>
+              ))}
             </div>
+          </div>
+        </div>
 
-            {/* Right Side Actions */}
-            <div className="flex items-center gap-6">
-              {/* Currency Selector */}
-              <button className="flex items-center gap-1 hover:text-white/80 transition">
-                <span className="font-medium">KES</span>
-                <ChevronDown className="w-3 h-3" />
+        {/* ── Utility Bar ────────────────────────────────────────── */}
+        <div className="utility-bar" style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+          <div className="main-container" style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 38 }}>
+            
+            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
+              {/* Currency */}
+              <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 600 }}>
+                KES <ChevronDown size={11} />
               </button>
-
-              {/* Language Selector */}
-              <button className="flex items-center gap-1 hover:text-white/80 transition">
-                <Globe className="w-4 h-4" />
-                <span className="font-medium">ENG</span>
-                <ChevronDown className="w-3 h-3" />
-              </button>
-
-              {/* Links */}
-              <a href="#" className="hidden md:inline hover:text-white/80 transition">Blog</a>
-              <a href="#" className="hidden md:inline hover:text-white/80 transition">Contact Us</a>
-              <a href="#" className="hidden md:inline hover:text-white/80 transition">My Account</a>
-
-              {/* Sign In / Register */}
-              <div className="flex items-center gap-2">
-                <User className="w-4 h-4" />
-                <a href="/login" className="font-medium hover:text-white/80 transition">Sign In</a>
-                <span className="text-white/60">/</span>
-                <a href="#" className="font-medium hover:text-white/80 transition">Register</a>
+              
+              <span style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.1)', display: 'inline-block' }} />
+              
+              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                <User size={13} color="rgba(255,255,255,0.45)" />
+                <a href="/login" className="nav-link" style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}>Sign In</a>
+                <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>/</span>
+                <a href="#" className="nav-link" style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}>Register</a>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Main Navbar */}
-      <nav className="bg-white border-b border-amber-200 shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-20">
+        {/* ── Main Navbar ─────────────────────────────────────────── */}
+        <nav style={{
+          background: scrolled ? 'rgba(17,17,17,0.97)' : '#1a1a2e',
+          backdropFilter: 'blur(20px)',
+          borderBottom: '1px solid rgba(245,158,11,0.12)',
+          position: 'sticky', top: 0, zIndex: 100,
+          transition: 'all 0.35s ease',
+          boxShadow: scrolled ? '0 4px 32px rgba(0,0,0,0.4)' : 'none',
+        }}>
+          <div className="main-container" style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', height: 72, gap: 32 }}>
+
             {/* Logo */}
-            <div className="flex items-center gap-3">
-              <div className="w-12 h-12 bg-gradient-to-br from-yellow-500 to-rose-900 rounded-xl flex items-center justify-center font-bold text-white shadow-lg shadow-rose-900/20">
-                <span className="text-lg">CC</span>
+            <a href="/" style={{ display: 'flex', alignItems: 'center', gap: 12, textDecoration: 'none', flexShrink: 0 }}>
+              <div style={{
+                width: 44, height: 44, borderRadius: 14,
+                background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                fontFamily: "'Syne', sans-serif", fontWeight: 800, color: 'white', fontSize: 15,
+                boxShadow: '0 6px 20px rgba(234,88,12,0.4)',
+                flexShrink: 0,
+              }}>CC</div>
+              <div>
+                <div className="logo-text" style={{ fontFamily: "'Syne', sans-serif", fontWeight: 800, fontSize: 20, lineHeight: 1.1 }}>
+                
+                </div>
+                <></>
+                <div className="logo-subtext" style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 500, letterSpacing: '0.5px' }}>Premium Tech Gear</div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-black leading-none">
-                  <span className="bg-gradient-to-r from-yellow-600 to-rose-900 bg-clip-text text-transparent">Code</span>
-                  <span className="text-slate-900">Commerce</span>
-                </span>
-                <span className="text-xs text-slate-500 font-medium">Premium Tech Gear</span>
-              </div>
-            </div>
+            </a>
 
-            {/* Search Bar - Desktop */}
-            <div className="hidden lg:flex flex-1 max-w-2xl mx-8">
-              <div className="relative w-full">
+            {/* Search — Desktop */}
+            <div className="desktop-search" style={{ flex: 1, maxWidth: 560, position: 'relative' }}>
+              <div style={{
+                display: 'flex', alignItems: 'center',
+                background: searchFocused ? 'rgba(255,255,255,0.1)' : 'rgba(255,255,255,0.06)',
+                border: `2px solid ${searchFocused ? '#f59e0b' : 'rgba(255,255,255,0.1)'}`,
+                borderRadius: 14, overflow: 'hidden',
+                transition: 'all 0.25s ease',
+                boxShadow: searchFocused ? '0 0 0 4px rgba(245,158,11,0.12)' : 'none',
+              }}>
                 <input
                   type="text"
-                  placeholder="Search for products, brands, or categories..."
-                  className="w-full pl-5 pr-12 py-3 bg-amber-50 border-2 border-amber-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-yellow-500 focus:ring-2 focus:ring-yellow-100 transition"
+                  placeholder="Search products, brands, categories..."
+                  className="search-input"
+                  onFocus={() => setSearchFocused(true)}
+                  onBlur={() => setSearchFocused(false)}
+                  style={{
+                    flex: 1, padding: '12px 16px', background: 'transparent',
+                    border: 'none', color: 'white', fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                  }}
                 />
-                <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-500 to-rose-900 text-white p-2 rounded-lg hover:shadow-lg transition">
-                  <Search className="w-4 h-4" />
+                <button style={{
+                  margin: 6, padding: '8px 16px', borderRadius: 10, border: 'none', cursor: 'pointer',
+                  background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+                  color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  flexShrink: 0,
+                }}>
+                  <Search size={16} />
                 </button>
               </div>
             </div>
 
-            {/* Right Side Actions - Desktop */}
-            <div className="hidden md:flex items-center gap-4">
-              {/* Cart */}
-              <button className="relative p-3 hover:bg-amber-50 rounded-xl transition group">
-                <ShoppingCart className="w-6 h-6 text-slate-700 group-hover:text-rose-900 transition" />
-                <span className="absolute -top-1 -right-1 bg-rose-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold shadow-md">
-                  3
-                </span>
+            {/* Right Actions */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: 12, flexShrink: 0 }}>
+              {/* Cart - Always visible */}
+              <button className="cart-btn" style={{
+                position: 'relative', width: 46, height: 46, borderRadius: 14,
+                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                transition: 'all 0.2s ease',
+              }}>
+                <ShoppingCart size={20} color="rgba(255,255,255,0.8)" className="cart-icon" />
+                <span style={{
+                  position: 'absolute', top: -6, right: -6,
+                  background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+                  color: 'white', fontSize: 10, fontWeight: 800,
+                  width: 20, height: 20, borderRadius: '50%',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  boxShadow: '0 2px 8px rgba(234,88,12,0.5)',
+                  border: '2px solid #1a1a2e',
+                }}>3</span>
+                {cartPulse && (
+                  <span style={{
+                    position: 'absolute', top: -6, right: -6,
+                    width: 20, height: 20, borderRadius: '50%',
+                    background: 'rgba(234,88,12,0.5)',
+                  }} className="cart-ping" />
+                )}
               </button>
 
-              {/* Account Button */}
-              <button className="flex items-center gap-2 px-5 py-3 bg-gradient-to-r from-yellow-500 to-rose-900 text-white font-bold rounded-xl hover:shadow-lg hover:shadow-rose-900/30 hover:scale-105 transition">
-                <User className="w-4 h-4" />
-                <span>Account</span>
+              {/* Account CTA - Desktop */}
+              <a href="/login" className="desktop-account" style={{
+                display: 'flex', alignItems: 'center', gap: 8,
+                padding: '10px 20px', borderRadius: 14, textDecoration: 'none',
+                background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+                color: 'white', fontWeight: 700, fontSize: 13,
+                boxShadow: '0 6px 20px rgba(234,88,12,0.35)',
+                transition: 'all 0.2s ease',
+              }}
+                onMouseEnter={e => e.currentTarget.style.transform = 'translateY(-2px)'}
+                onMouseLeave={e => e.currentTarget.style.transform = 'translateY(0)'}
+              >
+                <User size={15} />
+                Account
+              </a>
+
+              {/* Mobile search icon - visible only on mobile */}
+              <button className="mobile-search" style={{
+                display: 'none', width: 44, height: 44, borderRadius: 12,
+                background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                cursor: 'pointer', alignItems: 'center', justifyContent: 'center', color: 'white',
+              }}
+                onClick={() => setMobileMenuOpen(true)}
+              >
+                <Search size={20} />
               </button>
-            </div>
 
-            {/* Mobile Menu Button */}
-            <button
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="md:hidden p-2 hover:bg-amber-50 rounded-lg transition"
-            >
-              {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
-          </div>
-
-          {/* Mobile Search Bar */}
-          <div className="lg:hidden pb-4">
-            <div className="relative">
-              <input
-                type="text"
-                placeholder="Search products..."
-                className="w-full pl-4 pr-12 py-3 bg-amber-50 border-2 border-amber-200 rounded-xl text-sm text-slate-900 placeholder-slate-400 focus:outline-none focus:border-yellow-500"
-              />
-              <button className="absolute right-2 top-1/2 -translate-y-1/2 bg-gradient-to-r from-yellow-500 to-rose-900 text-white p-2 rounded-lg">
-                <Search className="w-4 h-4" />
+              {/* Mobile hamburger */}
+              <button
+                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                style={{
+                  display: 'none', width: 44, height: 44, borderRadius: 12,
+                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer', alignItems: 'center', justifyContent: 'center', color: 'white',
+                }}
+                className="mob-hamburger"
+              >
+                {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
               </button>
             </div>
           </div>
 
           {/* Mobile Menu */}
           {mobileMenuOpen && (
-            <div className="md:hidden py-4 border-t border-amber-200">
-              <div className="flex flex-col gap-3">
-                <a href="#" className="text-slate-700 hover:text-rose-900 py-2 px-4 hover:bg-amber-50 rounded-lg transition">Products</a>
-                <a href="#" className="text-slate-700 hover:text-rose-900 py-2 px-4 hover:bg-amber-50 rounded-lg transition">Categories</a>
-                <a href="#" className="text-slate-700 hover:text-rose-900 py-2 px-4 hover:bg-amber-50 rounded-lg transition">Deals</a>
-                <a href="#" className="text-slate-700 hover:text-rose-900 py-2 px-4 hover:bg-amber-50 rounded-lg transition">Blog</a>
-                <a href="#" className="text-slate-700 hover:text-rose-900 py-2 px-4 hover:bg-amber-50 rounded-lg transition">Contact</a>
-                <div className="flex gap-2 mt-2">
-                  <button className="flex-1 px-4 py-3 bg-gradient-to-r from-yellow-500 to-rose-900 text-white font-bold rounded-xl">
-                    Sign In
-                  </button>
-                  <button className="relative p-3 bg-amber-50 border-2 border-amber-200 rounded-xl">
-                    <ShoppingCart className="w-5 h-5 text-slate-700" />
-                    <span className="absolute -top-1 -right-1 bg-rose-900 text-white text-xs w-5 h-5 rounded-full flex items-center justify-center font-bold">
-                      3
-                    </span>
+            <div style={{ background: '#111', borderTop: '1px solid rgba(255,255,255,0.06)', padding: '16px 24px 24px' }}>
+              {/* Mobile Search */}
+              <div style={{ display: 'flex', gap: 8, marginBottom: 16 }}>
+                <input
+                  type="text"
+                  placeholder="Search products..."
+                  style={{
+                    flex: 1, padding: '12px 16px', background: 'rgba(255,255,255,0.06)',
+                    border: '1px solid rgba(255,255,255,0.12)', borderRadius: 12,
+                    color: 'white', fontSize: 13,
+                  }}
+                />
+                <button style={{
+                  padding: '12px 16px', background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+                  border: 'none', borderRadius: 12, cursor: 'pointer',
+                }}>
+                  <Search size={16} color="white" />
+                </button>
+              </div>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                {['Products', 'Categories', 'Deals', 'Blog', 'Contact'].map(l => (
+                  <a key={l} href="#" className="mob-link" style={{
+                    color: 'rgba(255,255,255,0.65)', textDecoration: 'none', fontSize: 14, fontWeight: 500,
+                    padding: '10px 12px', borderRadius: 10, transition: 'all 0.2s ease',
+                  }}>{l}</a>
+                ))}
+                <div style={{ display: 'flex', gap: 10, marginTop: 12 }}>
+                  <a href="/login" style={{
+                    flex: 1, textAlign: 'center', padding: '12px', borderRadius: 12,
+                    background: 'linear-gradient(135deg, #f59e0b, #ea580c)', color: 'white',
+                    fontWeight: 700, fontSize: 14, textDecoration: 'none',
+                  }}>Sign In</a>
+                  <button style={{
+                    position: 'relative', padding: '12px 18px', borderRadius: 12,
+                    background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                    cursor: 'pointer',
+                  }}>
+                    <ShoppingCart size={18} color="rgba(255,255,255,0.8)" />
+                    <span style={{
+                      position: 'absolute', top: -4, right: -4,
+                      background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+                      color: 'white', fontSize: 10, fontWeight: 800,
+                      width: 18, height: 18, borderRadius: '50%',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>3</span>
                   </button>
                 </div>
               </div>
             </div>
           )}
-        </div>
-      </nav>
+        </nav>
 
-      {/* Category Navigation Bar */}
-      <div className="bg-white border-b border-amber-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center gap-1 overflow-x-auto py-3 scrollbar-hide">
-            <button className="px-5 py-2 bg-gradient-to-r from-yellow-500 to-rose-900 text-white font-semibold rounded-lg whitespace-nowrap hover:shadow-md transition">
+        {/* ── Category Bar ─────────────────────────────────────────── */}
+        <div style={{
+          background: '#111',
+          borderBottom: '1px solid rgba(245,158,11,0.12)',
+        }}>
+          <div className="category-container" style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', alignItems: 'center', gap: 4, overflowX: 'auto', height: 48, WebkitOverflowScrolling: 'touch', scrollbarWidth: 'none', msOverflowStyle: 'none' }}>
+            {/* Hide scrollbar for Chrome/Safari */}
+            <style>{`
+              .category-container::-webkit-scrollbar { display: none; }
+            `}</style>
+            
+            {/* All Categories pill */}
+            <button style={{
+              padding: '6px 18px', borderRadius: 10, border: 'none', cursor: 'pointer', flexShrink: 0,
+              background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
+              color: 'white', fontWeight: 700, fontSize: 13,
+              boxShadow: '0 4px 12px rgba(234,88,12,0.3)',
+              whiteSpace: 'nowrap',
+            }}>
               All Categories
             </button>
-            <a href="#" className="px-5 py-2 text-slate-700 font-medium hover:text-rose-900 hover:bg-amber-50 rounded-lg whitespace-nowrap transition">
-              Electronics
-            </a>
-            <a href="#" className="px-5 py-2 text-slate-700 font-medium hover:text-rose-900 hover:bg-amber-50 rounded-lg whitespace-nowrap transition">
-              Monitors
-            </a>
-            <a href="#" className="px-5 py-2 text-slate-700 font-medium hover:text-rose-900 hover:bg-amber-50 rounded-lg whitespace-nowrap transition">
-              Components
-            </a>
-            <a href="#" className="px-5 py-2 text-slate-700 font-medium hover:text-rose-900 hover:bg-amber-50 rounded-lg whitespace-nowrap transition">
-              Peripherals
-            </a>
-            <a href="#" className="px-5 py-2 text-slate-700 font-medium hover:text-rose-900 hover:bg-amber-50 rounded-lg whitespace-nowrap transition">
-              Audio
-            </a>
-            <a href="#" className="px-5 py-2 text-slate-700 font-medium hover:text-rose-900 hover:bg-amber-50 rounded-lg whitespace-nowrap transition">
-              Accessories
-            </a>
-            <a href="#" className="px-5 py-2 text-slate-700 font-medium hover:text-rose-900 hover:bg-amber-50 rounded-lg whitespace-nowrap transition">
-              Build PC
-            </a>
-            <a href="#" className="px-5 py-2 text-rose-900 font-bold hover:bg-amber-50 rounded-lg whitespace-nowrap transition">
+
+            {categories.map(cat => (
+              <a key={cat} href="#" className="cat-link" style={{
+                padding: '6px 16px', borderRadius: 10, color: 'rgba(255,255,255,0.55)',
+                textDecoration: 'none', fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap',
+                flexShrink: 0,
+              }}>{cat}</a>
+            ))}
+
+            <a href="#" style={{
+              padding: '6px 16px', borderRadius: 10, textDecoration: 'none', whiteSpace: 'nowrap',
+              flexShrink: 0, fontWeight: 700, fontSize: 13,
+              background: 'rgba(234,88,12,0.12)', color: '#f59e0b',
+              border: '1px solid rgba(234,88,12,0.25)',
+            }}>
               🔥 Hot Deals
             </a>
           </div>
         </div>
-      </div>
 
-    
-    </div>
+      </div>
+    </>
   );
 }
