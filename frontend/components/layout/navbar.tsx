@@ -70,51 +70,13 @@ export default function Navbar() {
 
       <div style={{ fontFamily: "'DM Sans', sans-serif" }}>
 
-        {/* ── Ticker Top Bar ─────────────────────────────────────── */}
-        <div style={{ background: 'linear-gradient(135deg, #f59e0b, #ea580c)', padding: '8px 0', overflow: 'hidden' }}>
-          <div className="ticker-wrap">
-            <div className="ticker-inner">
-              {[...Array(2)].flatMap(() => [
-                '🚀 Free Shipping on Orders KES 5,000+',
-                '⚡ Flash Sale: 30% Off Accessories Today',
-                '🛡️ 100% Secure Payments',
-                '🎧 24/7 Developer Support',
-                '↩️ 30-Day Easy Returns',
-                '🔥 New Arrivals — Shop Now',
-              ]).map((item, i) => (
-                <span key={i} className="ticker-item" style={{ color: 'white', fontWeight: 700, fontSize: 12, letterSpacing: '0.5px', flexShrink: 0 }}>
-                  {item}
-                </span>
-              ))}
-            </div>
-          </div>
-        </div>
+     
 
-        {/* ── Utility Bar ────────────────────────────────────────── */}
-        <div className="utility-bar" style={{ background: '#111', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
-          <div className="main-container" style={{ maxWidth: 1280, margin: '0 auto', padding: '0 32px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', height: 38 }}>
-            
-            <div style={{ display: 'flex', alignItems: 'center', gap: 20 }}>
-              {/* Currency */}
-              <button style={{ display: 'flex', alignItems: 'center', gap: 4, background: 'none', border: 'none', cursor: 'pointer', color: 'rgba(255,255,255,0.5)', fontSize: 12, fontWeight: 600 }}>
-                KES <ChevronDown size={11} />
-              </button>
-              
-              <span style={{ width: 1, height: 14, background: 'rgba(255,255,255,0.1)', display: 'inline-block' }} />
-              
-              <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-                <User size={13} color="rgba(255,255,255,0.45)" />
-                <a href="/login" className="nav-link" style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}>Sign In</a>
-                <span style={{ color: 'rgba(255,255,255,0.2)', fontSize: 12 }}>/</span>
-                <a href="#" className="nav-link" style={{ color: 'rgba(255,255,255,0.55)', fontSize: 12, textDecoration: 'none', fontWeight: 600 }}>Register</a>
-              </div>
-            </div>
-          </div>
-        </div>
+    
 
         {/* ── Main Navbar ─────────────────────────────────────────── */}
         <nav style={{
-          background: scrolled ? 'rgba(17,17,17,0.97)' : '#1a1a2e',
+          background: scrolled ? 'FFFBEB' : '#FFFBEB',
           backdropFilter: 'blur(20px)',
           borderBottom: '1px solid rgba(245,158,11,0.12)',
           position: 'sticky', top: 0, zIndex: 100,
@@ -138,7 +100,7 @@ export default function Navbar() {
                 
                 </div>
                 <></>
-                <div className="logo-subtext" style={{ color: 'rgba(255,255,255,0.35)', fontSize: 10, fontWeight: 500, letterSpacing: '0.5px' }}>Premium Tech Gear</div>
+                <div className="logo-subtext" style={{ color: 'black', fontSize: 10, fontWeight: 500, letterSpacing: '0.5px' }}>Premium Tech Gear</div>
               </div>
             </a>
 
@@ -157,10 +119,10 @@ export default function Navbar() {
                   placeholder="Search products, brands, categories..."
                   className="search-input"
                   onFocus={() => setSearchFocused(true)}
-                  onBlur={() => setSearchFocused(false)}
+                  onBlur={() => setSearchFocused(true)}
                   style={{
                     flex: 1, padding: '12px 16px', background: 'transparent',
-                    border: 'none', color: 'white', fontSize: 13, fontFamily: "'DM Sans', sans-serif",
+                    border: 'none', color: 'black', fontSize: 13, fontFamily: "'DM Sans', sans-serif",
                   }}
                 />
                 <button style={{
@@ -169,7 +131,7 @@ export default function Navbar() {
                   color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center',
                   flexShrink: 0,
                 }}>
-                  <Search size={16} />
+                  <Search size={16} color='black' />
                 </button>
               </div>
             </div>
@@ -183,7 +145,7 @@ export default function Navbar() {
                 cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center',
                 transition: 'all 0.2s ease',
               }}>
-                <ShoppingCart size={20} color="rgba(255,255,255,0.8)" className="cart-icon" />
+                <ShoppingCart size={20} color="black" className="cart-icon" />
                 <span style={{
                   position: 'absolute', top: -6, right: -6,
                   background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
@@ -207,7 +169,7 @@ export default function Navbar() {
                 display: 'flex', alignItems: 'center', gap: 8,
                 padding: '10px 20px', borderRadius: 14, textDecoration: 'none',
                 background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
-                color: 'white', fontWeight: 700, fontSize: 13,
+                color: 'black', fontWeight: 700, fontSize: 13,
                 boxShadow: '0 6px 20px rgba(234,88,12,0.35)',
                 transition: 'all 0.2s ease',
               }}
@@ -222,7 +184,7 @@ export default function Navbar() {
               <button className="mobile-search" style={{
                 display: 'none', width: 44, height: 44, borderRadius: 12,
                 background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-                cursor: 'pointer', alignItems: 'center', justifyContent: 'center', color: 'white',
+                cursor: 'pointer', alignItems: 'center', justifyContent: 'center', color: 'black',
               }}
                 onClick={() => setMobileMenuOpen(true)}
               >
@@ -234,8 +196,8 @@ export default function Navbar() {
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                 style={{
                   display: 'none', width: 44, height: 44, borderRadius: 12,
-                  background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
-                  cursor: 'pointer', alignItems: 'center', justifyContent: 'center', color: 'white',
+                  background: 'rgba(7, 5, 5, 0.06)', border: '1px solid rgba(255,255,255,0.1)',
+                  cursor: 'pointer', alignItems: 'center', justifyContent: 'center', color: 'black',
                 }}
                 className="mob-hamburger"
               >
@@ -283,11 +245,11 @@ export default function Navbar() {
                     background: 'rgba(255,255,255,0.06)', border: '1px solid rgba(255,255,255,0.1)',
                     cursor: 'pointer',
                   }}>
-                    <ShoppingCart size={18} color="rgba(255,255,255,0.8)" />
+                    <ShoppingCart size={18} color="black" />
                     <span style={{
                       position: 'absolute', top: -4, right: -4,
                       background: 'linear-gradient(135deg, #f59e0b, #ea580c)',
-                      color: 'white', fontSize: 10, fontWeight: 800,
+                      color: 'black', fontSize: 10, fontWeight: 800,
                       width: 18, height: 18, borderRadius: '50%',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                     }}>3</span>

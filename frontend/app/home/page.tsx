@@ -1,30 +1,11 @@
-  import { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
   import { MagneticButton } from '@/components/products/magneticButton';
   import { Counter } from '@/components/products/counterAnimation';
   import { CategoryCard } from '@/components/products/categoryCard';
   import { ProductCard } from '@/components/products/ProductsCard';
 import Navbar from "@/components/layout/navbar";
 import Footer from "@/components/layout/footer";
-   
-  function TickerTape() {
-  const items = ["🚀 Free Shipping on Orders $50+", "💻 New Developer Kits Arrived", "⚡ Flash Sale: 30% Off Accessories", "🎯 Code Better with CodeCommerce", "🔥 Top Rated Gear of 2025"];
-  const doubled = [...items, ...items];
 
-  return (
-    <div style={{ background: "linear-gradient(135deg, #f59e0b, #ea580c)", overflow: "hidden", padding: "12px 0", position: "relative" }}>
-      <div style={{
-        display: "flex", gap: 60, whiteSpace: "nowrap",
-        animation: "ticker 25s linear infinite",
-      }}>
-        {doubled.map((item, i) => (
-          <span key={i} style={{ color: "white", fontWeight: 700, fontSize: 13, letterSpacing: "0.5px", flexShrink: 0 }}>
-            {item}
-          </span>
-        ))}
-      </div>
-    </div>
-  );
-}
 
 
  export default function HomePage() {
@@ -73,14 +54,104 @@ import Footer from "@/components/layout/footer";
         .fade-delay-1 { animation-delay: 0.1s; opacity: 0; }
         .fade-delay-2 { animation-delay: 0.25s; opacity: 0; }
         .fade-delay-3 { animation-delay: 0.4s; opacity: 0; }
+
+        /* ── Responsive Overrides ── */
+
+        /* Hero */
+        .hero-inner {
+          max-width: 1200px;
+          margin: 0 auto;
+          padding: 80px 40px;
+          display: flex;
+          align-items: center;
+          gap: 80px;
+          width: 100%;
+          position: relative;
+        }
+        .hero-text { flex: 1; }
+        .hero-visual { flex: 1; display: flex; justify-content: center; align-items: center; }
+
+        /* Stats */
+        .stats-row { display: flex; gap: 40px; margin-top: 48px; flex-wrap: wrap; }
+
+        /* Hero CTA buttons */
+        .hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; }
+
+        /* Products grid */
+        .products-grid {
+          display: grid;
+          grid-template-columns: repeat(3, 1fr);
+          gap: 24px;
+        }
+
+        /* Tabs */
+        .tabs-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+        /* Category grid */
+        .category-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 20px;
+        }
+
+        /* Features grid */
+        .features-grid {
+          display: grid;
+          grid-template-columns: repeat(4, 1fr);
+          gap: 32px;
+          max-width: 1000px;
+          margin: 0 auto;
+        }
+
+        /* Featured section header */
+        .featured-header {
+          display: flex;
+          align-items: flex-end;
+          justify-content: space-between;
+          margin-bottom: 40px;
+          flex-wrap: wrap;
+          gap: 16px;
+        }
+
+        /* ── Small screens (≤ 768px) ── */
+        @media (max-width: 768px) {
+          .hero-inner {
+            flex-direction: column;
+            padding: 48px 20px 40px;
+            gap: 40px;
+            text-align: center;
+          }
+          .hero-text { width: 100%; }
+          .hero-ctas { justify-content: center; }
+          .stats-row { justify-content: center; gap: 24px; }
+          .hero-visual { width: 100%; }
+          .hero-visual > div { transform: scale(0.72); }
+
+          .products-grid { grid-template-columns: 1fr; }
+          .category-grid { grid-template-columns: repeat(2, 1fr); }
+          .features-grid { grid-template-columns: repeat(2, 1fr); gap: 24px; }
+
+          .featured-header { flex-direction: column; align-items: flex-start; }
+          .tabs-row { width: 100%; overflow-x: auto; flex-wrap: nowrap; padding-bottom: 4px; }
+          .tabs-row::-webkit-scrollbar { height: 3px; }
+
+          /* Section paddings */
+          .section-products { padding: 48px 20px !important; }
+          .section-category { padding: 48px 20px !important; }
+          .section-features { padding: 48px 20px !important; }
+
+          /* Features heading */
+          .features-heading { font-size: 28px !important; }
+        }
+
+        /* ── Extra small (≤ 480px) ── */
+        @media (max-width: 480px) {
+          .category-grid { grid-template-columns: 1fr; }
+          .features-grid { grid-template-columns: 1fr; }
+          .stats-row { flex-direction: column; align-items: center; gap: 16px; }
+        }
       `}</style>
    
-   
-   
-   
-   
-   <div style={{ paddingTop: 60 }}><TickerTape /></div>
-
       {/* HERO */}
       <section style={{
         background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 40%, #0f3460 70%, #533483 100%)",
@@ -91,8 +162,8 @@ import Footer from "@/components/layout/footer";
         <div style={{ position: "absolute", top: -100, right: -100, width: 500, height: 500, borderRadius: "50%", background: "radial-gradient(circle, rgba(245,158,11,0.15) 0%, transparent 70%)" }} />
         <div style={{ position: "absolute", bottom: -150, left: -50, width: 400, height: 400, borderRadius: "50%", background: "radial-gradient(circle, rgba(234,88,12,0.12) 0%, transparent 70%)" }} />
         
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "80px 40px", display: "flex", alignItems: "center", gap: 80, width: "100%", position: "relative" }}>
-          <div style={{ flex: 1 }}>
+        <div className="hero-inner">
+          <div className="hero-text">
             <div className="fade-in fade-delay-1" style={{ display: "inline-flex", alignItems: "center", gap: 8, background: "rgba(245,158,11,0.15)", border: "1px solid rgba(245,158,11,0.3)", borderRadius: "999px", padding: "6px 16px", marginBottom: 24 }}>
               <span style={{ width: 6, height: 6, borderRadius: "50%", background: "#f59e0b", display: "inline-block" }} />
               <span style={{ color: "#f59e0b", fontSize: 12, fontWeight: 700, letterSpacing: "1px" }}>NEW ARRIVALS 2025</span>
@@ -109,7 +180,7 @@ import Footer from "@/components/layout/footer";
             <p className="fade-in fade-delay-3" style={{ color: "rgba(255,255,255,0.7)", fontSize: 16, lineHeight: 1.8, marginBottom: 36, maxWidth: 440 }}>
               Your one-stop shop for all your coding needs. Discover best-in-class peripherals, gear, and tools curated for developers who care about their craft.
             </p>
-            <div className="fade-in fade-delay-3" style={{ display: "flex", gap: 16, flexWrap: "wrap" }}>
+            <div className="fade-in fade-delay-3 hero-ctas">
               <MagneticButton href="#" className="">
                 <span style={{
                   background: "linear-gradient(135deg, #f59e0b, #ea580c)",
@@ -128,7 +199,7 @@ import Footer from "@/components/layout/footer";
               </MagneticButton>
             </div>
             {/* Stats row */}
-            <div style={{ display: "flex", gap: 40, marginTop: 48 }}>
+            <div className="stats-row">
               {[{ n: 12000, suf: "+", label: "Customers" }, { n: 500, suf: "+", label: "Products" }, { n: 98, suf: "%", label: "Satisfaction" }].map((stat, i) => (
                 <div key={i}>
                   <div style={{ fontFamily: "'Syne', sans-serif", fontSize: 28, fontWeight: 800, color: "#f59e0b" }}>
@@ -139,7 +210,7 @@ import Footer from "@/components/layout/footer";
               ))}
             </div>
           </div>
-          <div className="hero-emoji" style={{ flex: 1, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <div className="hero-emoji hero-visual">
             <div style={{ position: "relative" }}>
               <div style={{ width: 380, height: 380, borderRadius: "50%", background: "rgba(245,158,11,0.08)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(245,158,11,0.15)" }}>
                 <div style={{ width: 300, height: 300, borderRadius: "50%", background: "rgba(245,158,11,0.1)", display: "flex", alignItems: "center", justifyContent: "center", border: "1px solid rgba(245,158,11,0.2)" }}>
@@ -170,25 +241,26 @@ import Footer from "@/components/layout/footer";
       </section>
 
       {/* FEATURED PRODUCTS */}
-      <section style={{ maxWidth: 1200, margin: "0 auto", padding: "80px 40px" }}>
-        <div style={{ display: "flex", alignItems: "flex-end", justifyContent: "space-between", marginBottom: 40 }}>
+      <section className="section-products" style={{ maxWidth: 1200, margin: "0 auto", padding: "80px 40px" }}>
+        <div className="featured-header">
           <div>
             <p style={{ color: "#f59e0b", fontWeight: 700, fontSize: 12, letterSpacing: "2px", textTransform: "uppercase", marginBottom: 8 }}>Handpicked for You</p>
             <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 40, fontWeight: 800, color: "#1a1a1a" }}>Featured Products</h2>
           </div>
           {/* Tab filter */}
-          <div style={{ display: "flex", gap: 8 }}>
+          <div className="tabs-row">
             {tabs.map(tab => (
               <button key={tab} onClick={() => setActiveTab(tab)} style={{
                 padding: "8px 18px", borderRadius: "999px", border: "none", cursor: "pointer",
                 background: activeTab === tab ? "linear-gradient(135deg, #f59e0b, #ea580c)" : "#f0f0f0",
                 color: activeTab === tab ? "white" : "#555",
-                fontWeight: 600, fontSize: 13, transition: "all 0.25s ease"
+                fontWeight: 600, fontSize: 13, transition: "all 0.25s ease",
+                whiteSpace: "nowrap", flexShrink: 0
               }}>{tab}</button>
             ))}
           </div>
         </div>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(3, 1fr)", gap: 24 }}>
+        <div className="products-grid">
           {products.map((p, i) => <ProductCard key={i} {...p} />)}
         </div>
         <div style={{ textAlign: "center", marginTop: 40 }}>
@@ -203,25 +275,25 @@ import Footer from "@/components/layout/footer";
 
       {/* SHOP BY CATEGORY */}
       <section style={{ background: "linear-gradient(180deg, #fff7ed 0%, #f9f7f4 100%)", padding: "80px 0" }}>
-        <div style={{ maxWidth: 1200, margin: "0 auto", padding: "0 40px" }}>
+        <div className="section-category" style={{ maxWidth: 1200, margin: "0 auto", padding: "0 40px" }}>
           <div style={{ textAlign: "center", marginBottom: 48 }}>
             <p style={{ color: "#f59e0b", fontWeight: 700, fontSize: 12, letterSpacing: "2px", textTransform: "uppercase", marginBottom: 8 }}>Browse</p>
             <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 40, fontWeight: 800, color: "#1a1a1a" }}>Shop By Category</h2>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 20 }}>
+          <div className="category-grid">
             {categories.map((c, i) => <CategoryCard key={i} {...c} />)}
           </div>
         </div>
       </section>
 
       {/* INTERACTIVE MARQUEE BANNER */}
-      <section style={{ background: "linear-gradient(135deg, #1a1a2e, #0f3460)", padding: "64px 40px", textAlign: "center" }}>
+      <section className="section-features" style={{ background: "linear-gradient(135deg, #1a1a2e, #0f3460)", padding: "64px 40px", textAlign: "center" }}>
         <p style={{ color: "rgba(255,255,255,0.5)", fontWeight: 700, fontSize: 12, letterSpacing: "2px", textTransform: "uppercase", marginBottom: 12 }}>Why Developers Love Us</p>
-        <h2 style={{ fontFamily: "'Syne', sans-serif", fontSize: 40, fontWeight: 800, color: "white", marginBottom: 48 }}>
+        <h2 className="features-heading" style={{ fontFamily: "'Syne', sans-serif", fontSize: 40, fontWeight: 800, color: "white", marginBottom: 48 }}>
           Experience Streamlined<br />
           <span style={{ color: "#f59e0b" }}>Shopping With CodeCommerce</span>
         </h2>
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 32, maxWidth: 1000, margin: "0 auto" }}>
+        <div className="features-grid">
           {[
             { icon: "🚀", title: "Free Delivery", desc: "Free shipping on all orders over $50 — no hidden fees." },
             { icon: "⚡", title: "Lightning Fast", desc: "Same-day dispatch on in-stock items, no waiting." },
