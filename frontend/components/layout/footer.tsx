@@ -181,7 +181,7 @@ export default function Footer() {
             </p>
             {/* Socials */}
             <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
-              {[Facebook, Twitter, Instagram, Youtube].map((Icon, i) => (
+              {[Facebook, Twitter].map((Icon, i) => (
                 <button key={i} className="footer-social" style={{
                   background: 'rgba(255,255,255,0.05)',
                   border: '1px solid rgba(245, 158, 11, 0.2)',
