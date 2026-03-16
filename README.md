@@ -32,3 +32,13 @@ bashpython manage.py runserver
 API available at: http://localhost:8000/
 Admin panel: http://localhost:8000/admin/
 
+
+# Seeding the Database
+
+To populate your database with sample product data (5 categories with 5 subcategories each and 5 products), copy `seed_products.py` to `your_app/management/commands/` directory, then run the following command:
+
+```bash
+python manage.py seed_products
+```
+
+This will create 25 categories and 5 sample electronics products. The script uses `get_or_create()` so it's safe to run multiple times without creating duplicates.

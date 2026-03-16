@@ -1,9 +1,9 @@
-import axios from 'axios';
+import axios from "axios";
+import { env } from "@/utils/env"
 
+const BASE_URL = `${env.API_BASE_URL}${env.API_VERSION}/users`;
 
-const BASE_URL = 'http://127.0.0.1:8000/api/v1/users';
-
-const AUTH_URLS = {
+export const AUTH_URLS = {
   LOGIN: `${BASE_URL}/login/`,
   REGISTER: `${BASE_URL}/register/`,
   LOGOUT: `${BASE_URL}/logout/`,
@@ -11,7 +11,6 @@ const AUTH_URLS = {
   PROFILE: `${BASE_URL}/profile/`,
   CHANGE_PASSWORD: `${BASE_URL}/change-password/`,
   IS_AUTHENTICATED: `${BASE_URL}/is-authenticated/`,
-
 };
 
 export const login = async (credentials: {username: string, password: string}) => {
