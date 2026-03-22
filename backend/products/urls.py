@@ -9,6 +9,5 @@ router.register(r'categories', CategoryViewSet, basename='category')
 app_name = 'products'
 
 urlpatterns = [
-    path('', include(router.urls)),
-    path
+    path('', include(router.urls))
 ]
