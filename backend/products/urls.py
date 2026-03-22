@@ -10,4 +10,5 @@ app_name = 'products'
 
 urlpatterns = [
     path('', include(router.urls)),
+    path
 ]
